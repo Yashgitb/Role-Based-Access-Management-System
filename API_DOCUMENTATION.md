@@ -1,560 +1,97 @@
 # API Documentation
 
-Base URL: `http://localhost:5000/api`
-
-All protected endpoints require the `Authorization: Bearer <JWT_TOKEN>` request header.
-
----
-
-## 1. Health Check
-
-### `GET /` (Root URL, non-`/api`)
-
-- **Authentication**: None
-- **Permission**: None
-- **Response (`200 OK`)**: `Server is running` (plain text)
-
----
-
-## 2. Authentication (`/api/auth`)
-
-### `POST /api/auth/login`
-
-- **Authentication**: None
-- **Permission**: Public
-- **Request Body**:
-  ```json
-  {
-    "email": "user@example.com",
-    "password": "Password123!"
-  }
-  ```
-- **Success Response (`200 OK`)**:
-  ```json
-  {
-    "message": "Login successful",
-    "token": "<jwt_token>",
-    "user": {
-      "id": "66f1a2b3c4d5e6f7a8b9c0d1",
-      "name": "Jane Doe",
-      "email": "user@example.com",
-      "role": "Admin",
-      "permissions": {
-        "dashboard": { "view": true, "create": false, "edit": false, "delete": false },
-        "userManagement": { "view": true, "create": true, "edit": true, "delete": true },
-        "roleManagement": { "view": true, "create": true, "edit": true, "delete": true },
-        "reports": { "view": true, "create": true, "edit": true, "delete": true },
-        "settings": { "view": true, "create": true, "edit": true, "delete": true },
-        "myProfile": { "view": true, "create": false, "edit": true, "delete": false }
-      },
-      "isActive": true
-    }
-  }
-  ```
-- **Error Status Codes**:
-  - `400`: Email and password are required / Invalid JSON body
-  - `401`: Invalid email or password
-  - `403`: Account is deactivated or no valid role assigned
-  - `500`: Internal server error
-
-### `GET /api/auth/me`
-
-- **Authentication**: Required (Bearer JWT)
-- **Permission**: Authenticated user
-- **Success Response (`200 OK`)**:
-  ```json
-  {
-    "user": {
-      "id": "66f1a2b3c4d5e6f7a8b9c0d1",
-      "name": "Jane Doe",
-      "email": "user@example.com",
-      "role": "Admin",
-      "permissions": { "...": "..." },
-      "isActive": true
-    }
-  }
-  ```
-- **Error Status Codes**:
-  - `401`: Missing token / Invalid token / Token expired / User not found
-  - `403`: Your account is deactivated / No valid role assigned
-
-### `POST /api/auth/logout`
-
-- **Authentication**: Required (Bearer JWT)
-- **Permission**: Authenticated user
-- **Success Response (`200 OK`)**:
-  ```json
-  {
-    "message": "Logout successful"
-  }
-  ```
-- **Error Status Codes**: `401`, `403`
-
----
-
-## 3. Dashboard (`/api/dashboard`)
-
-### `GET /api/dashboard`
-
-- **Authentication**: Required
-- **Permission**: `dashboard.view`
-- **Success Response (`200 OK`)**:
-  ```json
-  {
-    "message": "Dashboard statistics retrieved successfully",
-    "totalUsers": 12,
-    "totalRoles": 3,
-    "activeUsers": 10,
-    "inactiveUsers": 2
-  }
-  ```
-- **Error Status Codes**: `401`, `403`, `500`
-
----
-
-## 4. User Management (`/api/users`)
-
-### `GET /api/users`
-
-- **Authentication**: Required
-- **Permission**: `userManagement.view`
-- **Query Parameters**:
-  - `page` (optional, integer ≥ 1, default `1`)
-  - `search` (optional, string — matches `name` or `email`, case-insensitive)
-  - `role` (optional, Role `ObjectId`)
-- **Example Request**: `GET /api/users?page=1&search=rahul&role=66f1a2b3c4d5e6f7a8b9c0a1`
-- **Success Response (`200 OK`)**:
-  ```json
-  {
-    "users": [
-      {
-        "_id": "66f1a2b3c4d5e6f7a8b9c0d1",
-        "name": "Rahul Sharma",
-        "email": "rahul@example.com",
-        "role": {
-          "_id": "66f1a2b3c4d5e6f7a8b9c0a1",
-          "name": "Employee"
-        },
-        "isActive": true,
-        "preferences": {
-          "compactLayout": false,
-          "showWelcomeMessage": true
-        },
-        "createdAt": "2026-11-26T09:00:00.000Z",
-        "updatedAt": "2026-11-26T09:00:00.000Z"
-      }
-    ],
-    "currentPage": 1,
-    "totalPages": 1,
-    "totalUsers": 1,
-    "limit": 10
-  }
-  ```
-- **Error Status Codes**: `400` (Invalid page number / Invalid filter / Invalid role ID), `401`, `403`, `500`
-
-### `GET /api/users/available-roles`
-
-- **Authentication**: Required
-- **Permission**: `userManagement.create` OR `userManagement.edit`
-- **Description**: Returns only roles whose permissions do not exceed the current user's permissions (prevents privilege escalation).
-- **Success Response (`200 OK`)**:
-  ```json
-  {
-    "roles": [
-      { "_id": "66f1a2b3c4d5e6f7a8b9c0a2", "name": "Employee" },
-      { "_id": "66f1a2b3c4d5e6f7a8b9c0a3", "name": "Manager" }
-    ]
-  }
-  ```
-- **Error Status Codes**: `401`, `403`, `500`
-
-### `GET /api/users/role-filters`
-
-- **Authentication**: Required
-- **Permission**: `userManagement.view`
-- **Success Response (`200 OK`)**:
-  ```json
-  {
-    "roles": [
-      { "_id": "66f1a2b3c4d5e6f7a8b9c0a1", "name": "Admin" },
-      { "_id": "66f1a2b3c4d5e6f7a8b9c0a2", "name": "Employee" },
-      { "_id": "66f1a2b3c4d5e6f7a8b9c0a3", "name": "Manager" }
-    ]
-  }
-  ```
-- **Error Status Codes**: `401`, `403`, `500`
-
-### `GET /api/users/:id`
-
-- **Authentication**: Required
-- **Permission**: `userManagement.view`
-- **Success Response (`200 OK`)**:
-  ```json
-  {
-    "user": {
-      "_id": "66f1a2b3c4d5e6f7a8b9c0d1",
-      "name": "Rahul Sharma",
-      "email": "rahul@example.com",
-      "role": { "_id": "66f1a2b3c4d5e6f7a8b9c0a2", "name": "Employee" },
-      "isActive": true,
-      "createdAt": "2026-11-26T09:00:00.000Z",
-      "updatedAt": "2026-11-26T09:00:00.000Z"
-    }
-  }
-  ```
-- **Error Status Codes**: `400` (Invalid user ID), `401`, `403`, `404` (User not found), `500`
-
-### `POST /api/users`
-
-- **Authentication**: Required
-- **Permission**: `userManagement.create`
-- **Request Body**:
-  ```json
-  {
-    "name": "Rahul Sharma",
-    "email": "rahul@example.com",
-    "password": "Password123!",
-    "role": "66f1a2b3c4d5e6f7a8b9c0a2"
-  }
-  ```
-- **Success Response (`201 Created`)**:
-  ```json
-  {
-    "message": "User created successfully",
-    "user": {
-      "_id": "66f1a2b3c4d5e6f7a8b9c0d1",
-      "name": "Rahul Sharma",
-      "email": "rahul@example.com",
-      "role": { "_id": "66f1a2b3c4d5e6f7a8b9c0a2", "name": "Employee" },
-      "isActive": true
-    }
-  }
-  ```
-- **Error Status Codes**: `400` (Missing fields / Password length / Invalid role ID / Validation error), `401`, `403` (Insufficient permission or unauthorized role assignment), `404` (Role not found), `409` (Email already exists), `500`
-
-### `PUT /api/users/:id`
-
-- **Authentication**: Required
-- **Permission**: `userManagement.edit`
-- **Request Body** (`name`, `email`, `password`, and `role` are optional; omit `password` to keep existing password):
-  ```json
-  {
-    "name": "Rahul S.",
-    "email": "rahul.s@example.com",
-    "password": "NewPassword123!",
-    "role": "66f1a2b3c4d5e6f7a8b9c0a3"
-  }
-  ```
-- **Success Response (`200 OK`)**:
-  ```json
-  {
-    "message": "User updated successfully",
-    "user": {
-      "_id": "66f1a2b3c4d5e6f7a8b9c0d1",
-      "name": "Rahul S.",
-      "email": "rahul.s@example.com",
-      "role": { "_id": "66f1a2b3c4d5e6f7a8b9c0a3", "name": "Manager" },
-      "isActive": true
-    }
-  }
-  ```
-- **Error Status Codes**: `400`, `401`, `403` (Cannot modify Admin, self, or assign higher-privileged role), `404`, `409` (Email already exists), `500`
-
-### `PATCH /api/users/:id/status`
-
-- **Authentication**: Required
-- **Permission**: `userManagement.edit`
-- **Request Body**:
-  ```json
-  {
-    "isActive": false
-  }
-  ```
-- **Success Response (`200 OK`)**:
-  ```json
-  {
-    "message": "User deactivated successfully",
-    "user": { "...": "..." }
-  }
-  ```
-- **Error Status Codes**: `400` (`isActive` must be Boolean / Invalid ID), `401`, `403`, `404`, `500`
-
-### `DELETE /api/users/:id`
-
-- **Authentication**: Required
-- **Permission**: `userManagement.delete`
-- **Success Response (`200 OK`)**:
-  ```json
-  {
-    "message": "User deleted successfully"
-  }
-  ```
-- **Error Status Codes**: `400`, `401`, `403` (Cannot delete Admin, self, or higher-privileged user), `404`, `500`
-
----
-
-## 5. Role Management (`/api/roles`)
-
-### `GET /api/roles`
-
-- **Authentication**: Required
-- **Permission**: `roleManagement.view`
-- **Success Response (`200 OK`)**:
-  ```json
-  {
-    "message": "Roles retrieved successfully",
-    "totalRoles": 3,
-    "roles": [
-      {
-        "_id": "66f1a2b3c4d5e6f7a8b9c0a1",
-        "name": "Admin",
-        "permissions": { "...": "..." },
-        "createdAt": "2026-11-26T08:00:00.000Z",
-        "updatedAt": "2026-11-26T08:00:00.000Z"
-      }
-    ]
-  }
-  ```
-- **Error Status Codes**: `401`, `403`, `500`
-
-### `GET /api/roles/:id`
-
-- **Authentication**: Required
-- **Permission**: `roleManagement.view`
-- **Success Response (`200 OK`)**: `{ "role": { ... } }`
-- **Error Status Codes**: `400`, `401`, `403`, `404`, `500`
-
-### `POST /api/roles`
-
-- **Authentication**: Required
-- **Permission**: `roleManagement.create`
-- **Request Body**:
-  ```json
-  {
-    "name": "Auditor",
-    "permissions": {
-      "dashboard": { "view": true },
-      "reports": { "view": true },
-      "myProfile": { "view": true, "edit": true }
-    }
-  }
-  ```
-- **Success Response (`201 Created`)**:
-  ```json
-  {
-    "message": "Role created successfully",
-    "role": {
-      "_id": "66f1a2b3c4d5e6f7a8b9c0f0",
-      "name": "Auditor",
-      "permissions": { "...": "..." }
-    }
-  }
-  ```
-- **Error Status Codes**: `400` (Missing name / Invalid permissions), `401`, `403` (Privilege escalation), `409` (Role already exists), `500`
-
-### `PUT /api/roles/:id`
-
-- **Authentication**: Required
-- **Permission**: `roleManagement.edit`
-- **Request Body**:
-  ```json
-  {
-    "name": "Senior Auditor",
-    "permissions": {
-      "reports": { "view": true, "create": false }
-    }
-  }
-  ```
-- **Success Response (`200 OK`)**:
-  ```json
-  {
-    "message": "Role updated successfully",
-    "role": { "...": "..." }
-  }
-  ```
-- **Error Status Codes**: `400` (Default roles cannot be renamed / Essential Admin permissions cannot be removed / Invalid permissions), `401`, `403` (Cannot modify Admin or higher-privileged role), `404`, `409` (Role name already exists), `500`
-
-### `DELETE /api/roles/:id`
-
-- **Authentication**: Required
-- **Permission**: `roleManagement.delete`
-- **Success Response (`200 OK`)**:
-  ```json
-  {
-    "message": "Role deleted successfully"
-  }
-  ```
-- **Error Status Codes**: `400` (Default roles cannot be deleted / Role assigned to existing users / Invalid ID), `401`, `403`, `404`, `500`
-
----
-
-## 6. Reports (`/api/reports`)
-
-### `GET /api/reports`
-
-- **Authentication**: Required
-- **Permission**: `reports.view`
-- **Query Parameters**:
-  - `role` (optional, Role `ObjectId`)
-- **Success Response (`200 OK`)**:
-  ```json
-  {
-    "message": "Reports retrieved successfully",
-    "summary": {
-      "totalRoles": 3,
-      "totalUsers": 12,
-      "activeUsers": 10,
-      "inactiveUsers": 2
-    },
-    "roleReports": [
-      {
-        "_id": "66f1a2b3c4d5e6f7a8b9c0a1",
-        "roleName": "Admin",
-        "totalUsers": 1,
-        "activeUsers": 1,
-        "inactiveUsers": 0
-      }
-    ]
-  }
-  ```
-- **Error Status Codes**: `400` (Invalid role ID / Invalid role filter), `401`, `403`, `500`
-
-### `GET /api/reports/roles`
-
-- **Authentication**: Required
-- **Permission**: `reports.view`
-- **Query Parameters**: `role` (optional, Role `ObjectId`)
-- **Success Response (`200 OK`)**:
-  ```json
-  {
-    "message": "Role statistics retrieved successfully",
-    "roles": [
-      {
-        "_id": "66f1a2b3c4d5e6f7a8b9c0a1",
-        "roleName": "Admin",
-        "totalUsers": 1,
-        "activeUsers": 1,
-        "inactiveUsers": 0
-      }
-    ]
-  }
-  ```
-- **Error Status Codes**: `400`, `401`, `403`, `500`
-
----
-
-## 7. Settings (`/api/settings`)
-
-### `GET /api/settings`
-
-- **Authentication**: Required
-- **Permission**: `settings.view`
-- **Success Response (`200 OK`)**:
-  ```json
-  {
-    "message": "Settings retrieved successfully",
-    "settings": {
-      "compactLayout": false,
-      "showWelcomeMessage": true
-    }
-  }
-  ```
-- **Error Status Codes**: `401`, `403`, `500`
-
-### `PUT /api/settings`
-
-- **Authentication**: Required
-- **Permission**: `settings.edit`
-- **Request Body**:
-  ```json
-  {
-    "compactLayout": true,
-    "showWelcomeMessage": false
-  }
-  ```
-- **Success Response (`200 OK`)**:
-  ```json
-  {
-    "message": "Settings updated successfully",
-    "settings": {
-      "compactLayout": true,
-      "showWelcomeMessage": false
-    }
-  }
-  ```
-- **Error Status Codes**: `400` (Invalid body, unknown field, non-Boolean value), `401`, `403`, `500`
-
----
-
-## 8. My Profile (`/api/profile`)
-
-### `GET /api/profile`
-
-- **Authentication**: Required
-- **Permission**: `myProfile.view`
-- **Success Response (`200 OK`)**:
-  ```json
-  {
-    "message": "Profile retrieved successfully",
-    "profile": {
-      "id": "66f1a2b3c4d5e6f7a8b9c0d1",
-      "name": "Jane Doe",
-      "email": "jane@example.com",
-      "role": "Employee",
-      "isActive": true,
-      "createdAt": "2026-11-26T09:00:00.000Z",
-      "updatedAt": "2026-11-26T09:00:00.000Z"
-    }
-  }
-  ```
-- **Error Status Codes**: `401`, `403`, `500`
-
-### `PUT /api/profile`
-
-- **Authentication**: Required
-- **Permission**: `myProfile.edit`
-- **Description**: Updates only `name` and/or `email` for the logged-in user (`req.user._id`). Attempts to modify `role`, `permissions`, `isActive`, or `password` are rejected.
-- **Request Body**:
-  ```json
-  {
-    "name": "Jane Smith",
-    "email": "jane.smith@example.com"
-  }
-  ```
-- **Success Response (`200 OK`)**:
-  ```json
-  {
-    "message": "Profile updated successfully",
-    "profile": {
-      "id": "66f1a2b3c4d5e6f7a8b9c0d1",
-      "name": "Jane Smith",
-      "email": "jane.smith@example.com",
-      "role": "Employee",
-      "isActive": true,
-      "createdAt": "2026-11-26T09:00:00.000Z",
-      "updatedAt": "2026-11-26T10:00:00.000Z"
-    }
-  }
-  ```
-- **Error Status Codes**: `400` (Empty/invalid name or email), `401`, `403` (Insufficient permission or restricted field tampering), `409` (Email already exists), `500`
-
-### `PUT /api/profile/password`
-
-- **Authentication**: Required
-- **Permission**: `myProfile.edit`
-- **Description**: Allows any authenticated user with `myProfile.edit` permission to change their own password (`req.user._id`) after verifying their current password.
-- **Request Body**:
-  ```json
-  {
-    "currentPassword": "OldPassword123!",
-    "newPassword": "NewPassword123!"
-  }
-  ```
-- **Success Response (`200 OK`)**:
-  ```json
-  {
-    "message": "Password changed successfully"
-  }
-  ```
-- **Error Status Codes**: `400` (Missing fields / Incorrect current password / Weak password / Same password), `401`, `403` (Insufficient permission), `500`
-
+Base URL: `http://localhost:5000/api`. All endpoints require `Authorization: Bearer <JWT_TOKEN>` except login and the server health check (`GET http://localhost:5000/`).
+
+## Endpoints
+
+| Method | Endpoint (relative to `/api`) | Required permission | Success / response fields |
+|---|---|---|---|
+| POST | `/auth/login` | Public | 200: message, token, user |
+| GET | `/auth/me` | Authenticated | 200: user |
+| POST | `/auth/logout` | Authenticated | 200: message |
+| GET | `/dashboard` | dashboard.view | 200: message, totalUsers, totalRoles, activeUsers, inactiveUsers |
+| GET | `/users` | userManagement.view | 200: users, currentPage, totalPages, totalUsers, limit |
+| GET | `/users/available-roles` | userManagement.create OR edit | 200: roles (assignable) |
+| GET | `/users/role-filters` | userManagement.view | 200: roles |
+| GET | `/users/:id` | userManagement.view | 200: user |
+| POST | `/users` | userManagement.create | 201: message, user |
+| PUT | `/users/:id` | userManagement.edit | 200: message, user |
+| PATCH | `/users/:id/status` | userManagement.edit | 200: message, user |
+| DELETE | `/users/:id` | userManagement.delete | 200: message |
+| GET | `/roles` | roleManagement.view | 200: message, totalRoles, roles |
+| GET | `/roles/:id` | roleManagement.view | 200: role |
+| POST | `/roles` | roleManagement.create | 201: message, role |
+| PUT | `/roles/:id` | roleManagement.edit | 200: message, role |
+| DELETE | `/roles/:id` | roleManagement.delete | 200: message |
+| GET | `/reports` | reports.view | 200: message, summary, roleReports |
+| GET | `/reports/roles` | reports.view | 200: message, roles |
+| GET | `/settings` | settings.view | 200: message, settings |
+| PUT | `/settings` | settings.edit | 200: message, settings |
+| GET | `/profile` | myProfile.view | 200: message, profile |
+| PUT | `/profile` | myProfile.edit | 200: message, profile |
+| PUT | `/profile/password` | myProfile.edit | 200: message |
+
+## Request and response examples
+
+Examples below are abbreviated; identifiers and credentials are illustrative.
+
+**Login — POST `/auth/login`**
+
+Request: `{"email":"user@example.com","password":"Password123!"}`
+
+Response: `{"message":"Login successful","token":"<jwt_token>","user":{"id":"<user_id>","name":"Jane Doe","email":"user@example.com","role":"Employee","permissions":{"dashboard":{"view":true}},"isActive":true}}`
+
+**Users — GET `/users?page=1&search=rahul&role=<role_id>`**
+
+`page` defaults to 1; `search` matches name or email; `role` is an optional Role ObjectId. Filters are combined before backend pagination (10 records per page).
+
+```json
+{
+  "users": [{"_id":"<user_id>","name":"Rahul Sharma","email":"rahul@example.com","role":{"_id":"<role_id>","name":"Employee"},"isActive":true}],
+  "currentPage": 1,
+  "totalPages": 1,
+  "totalUsers": 1,
+  "limit": 10
+}
+```
+
+**Other write requests** (JSON bodies):
+
+| Endpoint | Example body |
+|---|---|
+| POST `/users` | `{"name":"Rahul Sharma","email":"rahul@example.com","password":"Password123!","role":"<role_id>"}` |
+| PUT `/users/:id` | `{"name":"Rahul S.","email":"rahul.s@example.com","role":"<role_id>"}` (optional password reset also supported) |
+| PATCH `/users/:id/status` | `{"isActive":false}` |
+| POST `/roles` | `{"name":"Auditor","permissions":{"dashboard":{"view":true},"reports":{"view":true}}}` |
+| PUT `/roles/:id` | `{"permissions":{"reports":{"view":false}}}` |
+| PUT `/settings` | `{"compactLayout":true,"showWelcomeMessage":false}` |
+| PUT `/profile` | `{"name":"Jane Smith","email":"jane.smith@example.com"}` |
+| PUT `/profile/password` | `{"currentPassword":"OldPassword123!","newPassword":"NewPassword123!"}` |
+
+**Representative success responses** (abbreviated):
+
+| Endpoint | Example response |
+|---|---|
+| POST `/users` | `{"message":"User created successfully","user":{"_id":"<user_id>","name":"Rahul Sharma"}}` |
+| POST `/roles` | `{"message":"Role created successfully","role":{"_id":"<role_id>","name":"Auditor"}}` |
+| GET `/dashboard` | `{"totalUsers":12,"totalRoles":3,"activeUsers":10,"inactiveUsers":2}` |
+| GET `/reports?role=<role_id>` | `{"summary":{"totalRoles":1,"totalUsers":1,"activeUsers":1,"inactiveUsers":0},"roleReports":[{"_id":"<role_id>","roleName":"Admin","totalUsers":1,"activeUsers":1,"inactiveUsers":0}]}` |
+| GET `/reports/roles` | `{"roles":[{"_id":"<role_id>","roleName":"Admin","totalUsers":1,"activeUsers":1,"inactiveUsers":0}]}` |
+| GET `/settings` | `{"settings":{"compactLayout":false,"showWelcomeMessage":true}}` |
+| GET `/profile` | `{"profile":{"id":"<user_id>","name":"Jane Doe","email":"jane@example.com","role":"Employee","isActive":true}}` |
+| PUT `/profile/password` | `{"message":"Password changed successfully"}` |
+
+Both report endpoints accept an optional `role` filter.
+
+## Error codes and security
+
+| Status | Meaning |
+|---|---|
+| 400 | Invalid input, ID or request body |
+| 401 | Missing, invalid or expired JWT; incorrect login credentials |
+| 403 | Insufficient permissions or deactivated account |
+| 404 | Resource not found |
+| 409 | Duplicate email or role name |
+| 500 | Internal server error |
+
+Permissions are checked on the backend using the current assigned role. Password hashes are not returned. Role assignment prevents privilege escalation; default roles and roles assigned to users cannot be deleted. Profile updates are restricted to the current user.

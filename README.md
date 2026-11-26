@@ -2,6 +2,11 @@
 
 A full-stack MERN (MongoDB, Express.js, React.js, Node.js) **Role-Based Access Management System** developed as part of the Brained MERN Developer Intern assignment.
 
+
+## Application Demonstration
+
+**Demo Video:** [Watch application demonstration](YOUR_DEMO_VIDEO_URL)
+
 ---
 
 ## 1. Project Overview
@@ -215,9 +220,3 @@ Role-Based-Access-Management-System/
 
 - [API Documentation](./API_DOCUMENTATION.md)
 - [Database Schema Documentation](./DATABASE_SCHEMA.md)
-
----
-
-## 12. Application Demonstration
-
-- **Demo Video Link**: _Add your recorded project demonstration link here._
