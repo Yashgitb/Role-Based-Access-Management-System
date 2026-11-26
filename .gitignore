@@ -4,7 +4,6 @@ node_modules/
 # Environment variables
 .env
 .env.*
-!.env.example
 
 # Build output
 dist/
@@ -20,4 +19,5 @@ npm-debug.log*
 .vscode/*
 !.vscode/extensions.json
 .idea/
+.vercel
 

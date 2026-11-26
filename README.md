@@ -83,7 +83,7 @@ npm install
 
 ### Step 3: Configure backend environment variables
 
-Create a `.env` file inside the `Backend/` folder (you can copy `Backend/.env.example`) and add your own values:
+Create a `.env` file inside the `Backend/` folder and add your own values:
 
 ```env
 PORT=5000
@@ -121,7 +121,7 @@ npm install
 
 ### Step 6: Configure frontend API URL (optional)
 
-By default, the frontend connects to `http://localhost:5000/api`. If your backend runs on a different port or URL, create a `.env` file inside `Frontend/` (see `Frontend/.env.example`):
+By default, the frontend sends API requests to `/api` (which Vite proxies to `http://localhost:5000` locally, and Vercel routes to the backend in production). If your backend runs at a different URL, create a `.env` file inside `Frontend/`:
 
 ```env
 VITE_API_URL=http://localhost:5000/api
@@ -174,7 +174,6 @@ Role-Based-Access-Management-System/
 ├── DATABASE_SCHEMA.md
 ├── README.md
 ├── Backend/
-│   ├── .env.example
 │   ├── package.json
 │   └── src/
 │       ├── config/          # MongoDB connection (db.js)
@@ -185,7 +184,6 @@ Role-Based-Access-Management-System/
 │       ├── scripts/         # Database seeding script (seed.js)
 │       └── server.js        # Express app entry point
 └── Frontend/
-    ├── .env.example
     ├── index.html
     ├── package.json
     └── src/

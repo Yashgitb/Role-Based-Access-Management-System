@@ -18,16 +18,31 @@ const app = express();
 // Middleware
 app.use(express.json());
 
-connectDB();
+app.use(cors((req, callback) => {
+    const origin = req.headers.origin;
+    const host = req.headers.host;
+    const configuredClient = process.env.CLIENT_URL || "http://localhost:5173";
+    const allowed =
+        !origin ||
+        origin === configuredClient ||
+        (host && (origin === `https://${host}` || origin === `http://${host}`));
 
-app.use(cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173"
+    callback(null, { origin: allowed });
 }));
 
 const PORT = process.env.PORT || 5000;
 
 app.get("/", (req, res) => {
     res.send("Server is running");
+});
+
+app.use(async (req, res, next) => {
+    try {
+        await connectDB();
+        return next();
+    } catch (error) {
+        return next(error);
+    }
 });
 
 app.use("/api/auth", authRoutes);
@@ -41,6 +56,11 @@ app.use("/api/profile", profileRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+if (!process.env.VERCEL) {
+    connectDB();
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+    });
+}
+
+export default app;

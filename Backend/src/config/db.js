@@ -1,14 +1,29 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
+
+let pendingConnection = null;
 
 const connectDB = async () => {
-
-    try{
-        const conn = await mongoose.connect(process.env.MONGO_URI);
-        console.log(`MongoDB Connected: ${conn.connection.host}`);
+    if (mongoose.connection.readyState === 1) {
+        return mongoose.connection;
     }
-    catch(error){
+
+    if (pendingConnection) {
+        return pendingConnection;
+    }
+
+    try {
+        pendingConnection = mongoose.connect(process.env.MONGO_URI);
+        const conn = await pendingConnection;
+        console.log(`MongoDB Connected: ${conn.connection.host}`);
+        return conn;
+    } catch (error) {
         console.error("Database connection failed:", error.message);
-        process.exit(1);
+        if (!process.env.VERCEL) {
+            process.exit(1);
+        }
+        throw error;
+    } finally {
+        pendingConnection = null;
     }
 };
 
