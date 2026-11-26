@@ -394,7 +394,6 @@ export const updateUser = async (req, res) => {
             user.email = email;
         }
 
-        // Update password (optional)
         if (password !== undefined) {
 
             if (

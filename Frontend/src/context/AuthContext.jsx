@@ -107,10 +107,8 @@ export function AuthProvider({ children }) {
   const logout = useCallback(async () => {
     try {
       if (getStoredToken()) {
-        await authService.logout()
+        await authService.logout().catch(() => undefined)
       }
-    } catch {
-      // Token may already be expired or invalid; clear client state regardless.
     } finally {
       clearSession('')
     }

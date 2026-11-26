@@ -28,7 +28,6 @@ router.get(
     getAvailableRoles
 );
 
-// Get role filter options
 router.get(
     "/role-filters",
     authenticate,

@@ -67,7 +67,6 @@ export default function UserManagement() {
 
   const requestCounterRef = useRef(0)
 
-  // Debounce search input
   useEffect(() => {
     if (searchInput === debouncedSearch) return undefined
 
@@ -79,7 +78,6 @@ export default function UserManagement() {
     return () => clearTimeout(timer)
   }, [searchInput, debouncedSearch])
 
-  // Load role filter options and assignable roles
   useEffect(() => {
     let isMounted = true
 
@@ -630,7 +628,6 @@ export default function UserManagement() {
         />
       </div>
 
-      {/* Create User Modal */}
       <Modal
         isOpen={isCreateOpen}
         onClose={() => !isCreating && setIsCreateOpen(false)}
@@ -765,7 +762,6 @@ export default function UserManagement() {
         </form>
       </Modal>
 
-      {/* Edit User Modal */}
       <Modal
         isOpen={Boolean(editingUser)}
         onClose={() => !isUpdating && setEditingUser(null)}
@@ -895,7 +891,6 @@ export default function UserManagement() {
         </form>
       </Modal>
 
-      {/* Delete Confirmation Modal */}
       <ConfirmModal
         confirmLabel="Delete User"
         isLoading={isDeleting}

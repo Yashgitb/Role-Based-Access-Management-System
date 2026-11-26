@@ -139,11 +139,9 @@ export default function RoleManagement() {
   }
 
   function isCellDisabled(moduleKey, actionKey) {
-    // Non-Admin role managers cannot grant permissions they do not possess
     if (currentUser?.role !== 'Admin' && !can(moduleKey, actionKey)) {
       return true
     }
-    // Prevent administrative lockout on Admin role
     if (
       editingRole?.name === 'Admin' &&
       ESSENTIAL_ADMIN_CELLS.has(`${moduleKey}.${actionKey}`)
@@ -356,7 +354,6 @@ export default function RoleManagement() {
         </div>
       )}
 
-      {/* Create / Edit Role Modal */}
       <Modal
         isOpen={isFormOpen}
         maxWidth="max-w-2xl"
@@ -443,7 +440,6 @@ export default function RoleManagement() {
         </form>
       </Modal>
 
-      {/* Delete Role Confirmation Modal */}
       <ConfirmModal
         confirmLabel="Delete Role"
         isLoading={isDeleting}
