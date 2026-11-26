@@ -1,154 +1,87 @@
-# Role-Based Access Management System (MERN Stack)
+# Role-Based Access Management System
 
-A full-stack MERN (MongoDB, Express.js, React.js, Node.js) **Role-Based Access Management System** implementing JWT authentication, dynamic module-level authorization, user and role management, backend pagination with search and role filtering, reporting, application settings, profile management, and persistent dark/light mode.
-
----
-
-## Features
-
-- **JWT Authentication**: Email/password login (`bcryptjs` password hashing), `GET /api/auth/me` session restoration, and logout.
-- **Dynamic Role-Based Authorization (RBAC)**:
-  - Roles stored in MongoDB with embedded permissions across **6 modules** (`dashboard`, `userManagement`, `roleManagement`, `reports`, `settings`, `myProfile`) and **4 actions** (`view`, `create`, `edit`, `delete`).
-  - Backend middleware (`authenticate` + `authorize(module, action)`) enforces permissions dynamically on every request.
-  - Frontend sidebar navigation, route access (`ProtectedRoute`), and action buttons (`Create`, `Edit`, `Delete`, `Activate/Deactivate`) render dynamically from the logged-in user's permissions without hardcoding role names.
-- **User Management & Backend Pagination**:
-  - Create, view, edit, activate/deactivate, and delete users.
-  - Privilege escalation protection and protected Admin/self-account rules.
-  - Server-side MongoDB pagination (`10` users per page), search by name or email, and filtering by role.
-- **Role Management**:
-  - Create custom roles, edit module-wise permissions via an interactive permission matrix, and delete unassigned custom roles.
-  - Protects default roles (`Admin`, `Manager`, `Employee`), prevents administrative lockout, prevents privilege escalation, and blocks deletion of roles assigned to existing users.
-- **Dashboard & Reports**:
-  - Live system statistics (`totalUsers`, `totalRoles`, `activeUsers`, `inactiveUsers`).
-  - Role-wise user breakdown (`totalUsers`, `activeUsers`, `inactiveUsers`) with role filtering.
-- **Settings & My Profile**:
-  - Permission-protected user preferences (`compactLayout`, `showWelcomeMessage`) persisted in the `User` document.
-  - Self-service profile viewing, editing (`name`, `email`), and password changing (`PUT /api/profile/password` with current-password verification) scoped strictly to the authenticated user (`req.user._id`).
-- **Persistent Dark / Light Mode**:
-  - Available globally on all 7 pages (including Login) independently of Settings permissions, persisted in `localStorage`.
+A full-stack MERN (MongoDB, Express.js, React.js, Node.js) **Role-Based Access Management System** developed as part of the Brained MERN Developer Intern assignment.
 
 ---
 
-## Technology Stack
+## 1. Project Overview
 
-- **Frontend**: React 19, Vite, Tailwind CSS v4, React Router DOM, Axios
-- **Backend**: Node.js, Express.js, Mongoose, JSON Web Token (`jsonwebtoken`), `bcryptjs`, `dotenv`, `cors`
-- **Database**: MongoDB
+This application lets an organization manage users, roles, and page/action permissions from one admin portal. When a user logs in, the system issues a JWT token and dynamically shows only the pages and buttons allowed by their assigned role, while enforcing the same permission checks on every backend API route.
 
 ---
 
-## Project Folder Structure
+## 2. Features
 
-```text
-Role-Based-Access-Management-System/
-├── API_DOCUMENTATION.md
-├── DATABASE_SCHEMA.md
-├── README.md
-├── .gitignore
-├── Backend/
-│   ├── .env.example
-│   ├── .gitignore
-│   ├── package.json
-│   └── src/
-│       ├── config/
-│       │   └── db.js
-│       ├── controllers/
-│       │   ├── authController.js
-│       │   ├── dashboardController.js
-│       │   ├── profileController.js
-│       │   ├── reportController.js
-│       │   ├── roleController.js
-│       │   ├── settingsController.js
-│       │   └── userController.js
-│       ├── middleware/
-│       │   ├── authMiddleware.js
-│       │   ├── errorMiddleware.js
-│       │   └── permissionMiddleware.js
-│       ├── models/
-│       │   ├── Role.js
-│       │   └── User.js
-│       ├── routes/
-│       │   ├── authRoutes.js
-│       │   ├── dashboardRoutes.js
-│       │   ├── profileRoutes.js
-│       │   ├── reportRoutes.js
-│       │   ├── roleRoutes.js
-│       │   ├── settingsRoutes.js
-│       │   └── userRoutes.js
-│       ├── scripts/
-│       │   └── seed.js
-│       └── server.js
-└── Frontend/
-    ├── .env.example
-    ├── .gitignore
-    ├── eslint.config.js
-    ├── index.html
-    ├── package.json
-    ├── vite.config.js
-    └── src/
-        ├── App.jsx
-        ├── index.css
-        ├── main.jsx
-        ├── components/
-        │   ├── common/
-        │   │   ├── Alert.jsx
-        │   │   ├── ConfirmModal.jsx
-        │   │   ├── Loader.jsx
-        │   │   ├── Modal.jsx
-        │   │   ├── Pagination.jsx
-        │   │   ├── PermissionMatrix.jsx
-        │   │   └── ThemeToggle.jsx
-        │   └── layout/
-        │       ├── DashboardLayout.jsx
-        │       ├── Navbar.jsx
-        │       └── Sidebar.jsx
-        ├── context/
-        │   ├── AuthContext.jsx
-        │   ├── ThemeContext.jsx
-        │   ├── useAuth.js
-        │   └── useTheme.js
-        ├── pages/
-        │   ├── Dashboard.jsx
-        │   ├── Login.jsx
-        │   ├── MyProfile.jsx
-        │   ├── Reports.jsx
-        │   ├── RoleManagement.jsx
-        │   ├── Settings.jsx
-        │   └── UserManagement.jsx
-        ├── routes/
-        │   ├── AppRoutes.jsx
-        │   └── ProtectedRoute.jsx
-        ├── services/
-        │   ├── api.js
-        │   ├── authService.js
-        │   ├── dashboardService.js
-        │   ├── profileService.js
-        │   ├── reportService.js
-        │   ├── roleService.js
-        │   ├── settingsService.js
-        │   └── userService.js
-        └── utils/
-            └── permissions.js
+- **JWT Authentication**: Email and password login, session persistence on page refresh (`GET /api/auth/me`), and logout.
+- **Dynamic Role-Based Authorization**: Sidebar links, routes, and action buttons adapt automatically based on the user's role permissions stored in MongoDB.
+- **User Management**: Create users, edit name/email/password/role, activate or deactivate accounts, and delete users.
+- **Role Management**: View default roles and create, edit, or delete custom roles with module-level permissions (`View`, `Create`, `Edit`, `Delete`).
+- **Dynamic Role & Permission Allocation**: Updating a role's permissions updates access across the application without changing backend code or re-issuing tokens.
+- **Dashboard Statistics**: Live counts for total users, active users, inactive users, and total roles.
+- **Backend Pagination**: Server-side MongoDB pagination displaying **10 records per page** with Previous/Next controls.
+- **Search and Role Filtering**: Search users by name or email and filter by role together with pagination.
+- **Reports**: Role-wise user statistics (total, active, and inactive users) with role filtering.
+- **Settings**: Permission-protected user preferences for compact layout and showing or hiding the dashboard welcome banner.
+- **My Profile**: View account details, update name and email, and change password after verifying the current password.
+- **Persistent Dark and Light Mode**: Available on all pages (including Login) and saved in `localStorage`.
+
+---
+
+## 3. Technology Stack
+
+- **Frontend**: React.js (`react`, `react-dom`), Vite, React Router DOM, Axios
+- **Styling**: Tailwind CSS
+- **Backend**: Node.js, Express.js
+- **Database**: MongoDB with Mongoose
+- **Authentication & Security**: JSON Web Tokens (`jsonwebtoken`), `bcryptjs`, `cors`, `dotenv`
+
+---
+
+## 4. Default Role Permissions
+
+These initial permissions are created when you run the seed script on a fresh database:
+
+| Module | Admin | Manager | Employee |
+| :--- | :--- | :--- | :--- |
+| Dashboard | View | View | View |
+| User Management | View, Create, Edit, Delete | View | No Access |
+| Role Management | View, Create, Edit, Delete | No Access | No Access |
+| Reports | View, Create, Edit, Delete | View | No Access |
+| Settings | View, Create, Edit, Delete | No Access | No Access |
+| My Profile | View, Edit | View, Edit | View, Edit |
+
+---
+
+## 5. Prerequisites
+
+Make sure the following software is installed on your machine:
+
+- **Node.js** (v18 or later recommended)
+- **npm**
+- **MongoDB** (local installation or a **MongoDB Atlas** cluster)
+- **Git**
+
+---
+
+## 6. Installation and Setup
+
+### Step 1: Clone the repository
+
+```bash
+git clone https://github.com/Yashgitb/Role-Based-Access-Management-System.git
+cd Role-Based-Access-Management-System
 ```
 
----
-
-## Setup Instructions
-
-### Prerequisites
-
-- Node.js (v18+ recommended)
-- npm
-- MongoDB (MongoDB Atlas cluster or local MongoDB instance)
-
-### 1. Backend Setup
+### Step 2: Install backend dependencies
 
 ```bash
 cd Backend
 npm install
 ```
 
-Create a `.env` file in `Backend/` (use `Backend/.env.example` as a template):
+### Step 3: Configure backend environment variables
+
+Create a `.env` file inside the `Backend/` folder (you can copy `Backend/.env.example`) and add your own values:
 
 ```env
 PORT=5000
@@ -158,28 +91,35 @@ JWT_EXPIRES_IN=1d
 CLIENT_URL=http://localhost:5173
 ADMIN_NAME=System Admin
 ADMIN_EMAIL=admin@example.com
-ADMIN_PASSWORD=<strong_admin_password>
+ADMIN_PASSWORD=<your_admin_password>
 ```
 
-#### Initial Database Seeding (First-Time Setup Only)
+- `MONGO_URI`: Your local MongoDB URI or MongoDB Atlas connection string.
+- `JWT_SECRET`: A strong secret string used to sign JWT tokens.
+- `ADMIN_NAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`: Used once by the seed script to create the first Admin account.
 
-Run the seed script once on a fresh database to create the default `Admin`, `Manager`, and `Employee` roles and the initial Admin user:
+### Step 4: Seed the initial roles and Admin account
+
+Run this command once from the `Backend/` folder on a fresh database:
 
 ```bash
-cd Backend
 node ./src/scripts/seed.js
 ```
 
-> **Note**: Only run `seed.js` for initial setup. Do not re-run it if you want to keep modified role permissions untouched or avoid unintended checks.
+This creates the three default roles (`Admin`, `Manager`, `Employee`) and the initial Admin user using the credentials in `Backend/.env`.
 
-### 2. Frontend Setup
+### Step 5: Install frontend dependencies
+
+Open or switch to the `Frontend/` folder:
 
 ```bash
-cd Frontend
+cd ../Frontend
 npm install
 ```
 
-Optionally create `Frontend/.env` (defaults to `http://localhost:5000/api` if omitted):
+### Step 6: Configure frontend API URL (optional)
+
+By default, the frontend connects to `http://localhost:5000/api`. If your backend runs on a different port or URL, create a `.env` file inside `Frontend/` (see `Frontend/.env.example`):
 
 ```env
 VITE_API_URL=http://localhost:5000/api
@@ -187,88 +127,97 @@ VITE_API_URL=http://localhost:5000/api
 
 ---
 
-## Running the Application
+## 7. Running the Application
 
-Start both servers in separate terminals:
+Run the backend and frontend in **two separate terminals**:
 
-**Backend (port 5000):**
+### Terminal 1: Start the Backend
 
 ```bash
 cd Backend
 npm run dev
 ```
 
-**Frontend (port 5173):**
+For production mode without `nodemon`, you can run `npm start`.
+
+- **Backend URL**: `http://localhost:5000`
+
+### Terminal 2: Start the Frontend
 
 ```bash
 cd Frontend
 npm run dev
 ```
 
-Open `http://localhost:5173` in your browser.
+- **Frontend URL**: `http://localhost:5173`
+
+Open `http://localhost:5173` in your browser to use the application.
 
 ---
 
-## Default Role Permission Matrix
+## 8. Login Credentials
 
-| Module | Admin | Manager | Employee |
-| :--- | :--- | :--- | :--- |
-| **Dashboard** | View | View | View |
-| **User Management** | Full Access (`view`, `create`, `edit`, `delete`) | View | No Access |
-| **Role Management** | Full Access (`view`, `create`, `edit`, `delete`) | No Access | No Access |
-| **Reports** | Full Access (`view`, `create`, `edit`, `delete`) | View | No Access |
-| **Settings** | Full Access (`view`, `create`, `edit`, `delete`) | No Access | No Access |
-| **My Profile** | View & Edit | View & Edit | View & Edit |
+There is no public sign-up page. User accounts are created through the initial seed script or by an authorized user inside **User Management**.
 
-> These are initial seeded permissions. An Admin can dynamically adjust permissions (or create new custom roles) through **Role Management** without changing backend code or issuing new tokens.
+- **Initial Admin Login**: Use the `ADMIN_EMAIL` and `ADMIN_PASSWORD` values you configured in `Backend/.env` before running `node ./src/scripts/seed.js`.
+- **Testing Other Roles**: After logging in as Admin, open **User Management** and create test users with the `Manager` and `Employee` roles (using any test password of at least 8 characters), then log in with those accounts to verify role-based restrictions.
 
 ---
 
-## Authentication & Authorization Architecture
+## 9. Project Folder Structure
 
-1. **Login**: `POST /api/auth/login` verifies credentials using `bcryptjs` and returns a signed JWT containing `userId`, along with the user's current role name and permissions.
-2. **Request Lifecycle**:
-   `Client Request → Express Route → authenticate → authorize(module, action) → Controller → Mongoose → MongoDB`
-3. **`authenticate` Middleware**:
-   - Reads the `Authorization: Bearer <token>` header and verifies the JWT with `JWT_SECRET`.
-   - Loads the latest user document from MongoDB with `.populate("role")`.
-   - Rejects deleted users (`401`), deactivated accounts (`403`), and users without a valid role (`403`).
-4. **`authorize(module, action)` Middleware**:
-   - Checks `req.user.role.permissions?.[module]?.[action] === true` dynamically from the database on every request.
-5. **Frontend Sync**:
-   - Axios attaches the Bearer token automatically.
-   - `ProtectedRoute` refreshes `GET /api/auth/me` on route changes so updated role permissions reflect in the UI without requiring re-login.
-
----
-
-## Pagination Implementation
-
-`GET /api/users` implements MongoDB-level pagination:
-
-- Fixed page size of **10 records per page**.
-- Query parameters: `page` (positive integer, default `1`), `search` (case-insensitive regex on `name` or `email`), and `role` (Role `ObjectId`).
-- Uses `User.countDocuments(filter)`, `.skip(skip)`, and `.limit(10)` — never loads the full collection into memory.
-- Clamps `currentPage` safely if items are deleted on the last page (`Math.min(page, Math.max(totalPages, 1))`).
-- The frontend resets `page` to `1` whenever search or role filters change and cancels stale in-flight requests using `AbortController`.
-
----
-
-## Testing & Verification
-
-- **Frontend Lint & Build**:
-  ```bash
-  cd Frontend
-  npm run lint
-  npm run build
-  ```
-- **Backend Syntax Check**:
-  Check all backend files under `Backend/src` with `node --check`.
-- **End-to-End Scenarios**:
-  Verify authentication (valid/invalid/expired/missing JWT, deactivated account), dynamic role permissions, privilege escalation blocks, backend pagination/search/filtering, Dashboard, Reports, Settings, Profile updates, and dark/light theme persistence.
+```text
+Role-Based-Access-Management-System/
+├── API_DOCUMENTATION.md
+├── DATABASE_SCHEMA.md
+├── README.md
+├── Backend/
+│   ├── .env.example
+│   ├── package.json
+│   └── src/
+│       ├── config/          # MongoDB connection (db.js)
+│       ├── controllers/     # Route logic for auth, users, roles, dashboard, reports, settings, profile
+│       ├── middleware/      # JWT authentication, dynamic permission authorization, error handling
+│       ├── models/          # Mongoose schemas (User.js, Role.js)
+│       ├── routes/          # Express API route definitions
+│       ├── scripts/         # Database seeding script (seed.js)
+│       └── server.js        # Express app entry point
+└── Frontend/
+    ├── .env.example
+    ├── index.html
+    ├── package.json
+    └── src/
+        ├── components/      # Reusable UI components (common & layout)
+        ├── context/         # AuthContext and ThemeContext
+        ├── pages/           # Login, Dashboard, UserManagement, RoleManagement, Reports, Settings, MyProfile
+        ├── routes/          # AppRoutes and ProtectedRoute
+        ├── services/        # Axios instance and API service functions
+        └── utils/           # Permission helpers and formatting utilities
+```
 
 ---
 
-## Known Limitations
+## 10. Application Usage
 
-- **Stateless JWT Logout**: `POST /api/auth/logout` returns a success response and the frontend clears the stored token from `localStorage`. Because tokens are stateless without a server-side token blocklist collection, previously issued JWTs remain valid until expiration unless the user is deactivated (`isActive: false`) or deleted.
-- **Browser Automation Availability**: In headless/CLI environments where Chrome remote debugging is not active, end-to-end browser UI clicks must be verified manually in a browser alongside automated backend API integration tests.
+1. **Log in as Admin**: Open `http://localhost:5173/login` and sign in with your seeded Admin email and password.
+2. **Create Users**: Go to **User Management**, click **+ Create User**, enter Name, Email, Password, and pick a Role from the dropdown.
+3. **Create Custom Roles & Assign Permissions**: Go to **Role Management**, click **+ Create Role**, enter a role name, check the desired module permissions (`View`, `Create`, `Edit`, `Delete`), and save. You can also click **Edit** on existing roles to update permissions dynamically.
+4. **Change a User's Role**: In **User Management**, click **Edit** on a user row, select a new role (or update name, email, or password), and click **Save Changes**.
+5. **Test Pagination, Search, and Filtering**: In **User Management** (with more than 10 users), use **Previous** and **Next** to switch pages (10 users per page), type a name or email in the search bar, or filter by role. Changing search or filter resets the page back to 1.
+6. **Verify Manager and Employee Authorization**:
+   - Log in as a **Manager** to confirm the sidebar shows only **Dashboard**, **User Management** (view-only, no Create/Edit/Delete buttons), **Reports**, and **My Profile**.
+   - Log in as an **Employee** to confirm the sidebar shows only **Dashboard** and **My Profile**, and that visiting `/users`, `/roles`, `/reports`, or `/settings` directly in the URL bar displays **403 — Access Denied**.
+7. **Switch Dark and Light Mode**: Click the **Dark Mode / Light Mode** button in the top-right corner of the Login page or navigation bar. Refresh the browser to confirm the selected theme persists.
+
+---
+
+## 11. API and Database Documentation
+
+- [API Documentation](./API_DOCUMENTATION.md)
+- [Database Schema Documentation](./DATABASE_SCHEMA.md)
+
+---
+
+## 12. Application Demonstration
+
+- **Demo Video Link**: _Add your recorded project demonstration link here._
