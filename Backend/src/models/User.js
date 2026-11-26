@@ -30,6 +30,16 @@ const userSchema = new mongoose.Schema({
     isActive: {
         type: Boolean,
         default: true
+    },
+    preferences: {
+        compactLayout: {
+            type: Boolean,
+            default: false
+        },
+        showWelcomeMessage: {
+            type: Boolean,
+            default: true
+        }
     }
 },{ timestamps: true });
 

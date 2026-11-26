@@ -28,6 +28,14 @@ router.get(
     getAvailableRoles
 );
 
+// Get role filter options
+router.get(
+    "/role-filters",
+    authenticate,
+    authorize("userManagement", "view"),
+    getRoleFilters
+);
+
 // View all users
 router.get(
     "/",
@@ -75,15 +83,5 @@ router.delete(
     authorize("userManagement", "delete"),
     deleteUser
 );
-
-
-router.get(
-    "/role-filters",
-    authenticate,
-    authorize("userManagement", "view"),
-    getRoleFilters
-);
-
-
 
 export default router;

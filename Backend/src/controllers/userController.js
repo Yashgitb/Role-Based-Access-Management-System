@@ -27,6 +27,10 @@ const canAssignRole = (currentRole, targetRole) => {
         return false;
     }
 
+    if (currentRole.name === "Admin") {
+        return true;
+    }
+
     for (const module of modules) {
         for (const action of actions) {
 
@@ -343,7 +347,7 @@ export const updateUser = async (req, res) => {
     try {
 
         const { id } = req.params;
-        const { name, email, role } = req.body ?? {};
+        const { name, email, password, role } = req.body ?? {};
 
         if (!mongoose.isObjectIdOrHexString(id)) {
             return res.status(400).json({
@@ -390,6 +394,22 @@ export const updateUser = async (req, res) => {
             user.email = email;
         }
 
+        // Update password (optional)
+        if (password !== undefined) {
+
+            if (
+                typeof password !== "string" ||
+                password.length < 8 ||
+                Buffer.byteLength(password, "utf8") > 72
+            ) {
+                return res.status(400).json({
+                    message: "Password must be at least 8 characters and at most 72 bytes"
+                });
+            }
+
+            user.password = await bcrypt.hash(password, 10);
+        }
+
         // Change assigned role
         if (role !== undefined) {
 
@@ -420,9 +440,12 @@ export const updateUser = async (req, res) => {
 
         await user.populate("role", "name");
 
+        const safeUser = user.toObject();
+        delete safeUser.password;
+
         return res.status(200).json({
             message: "User updated successfully",
-            user
+            user: safeUser
         });
 
     } catch (error) {

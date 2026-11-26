@@ -1,17 +1,79 @@
 import { useState } from 'react'
+import { Navigate, useNavigate } from 'react-router-dom'
+import Alert from '../components/common/Alert.jsx'
+import Loader from '../components/common/Loader.jsx'
+import ThemeToggle from '../components/common/ThemeToggle.jsx'
+import { useAuth } from '../context/useAuth.js'
+import { getErrorMessage, getFirstAccessibleRoute } from '../utils/permissions.js'
 
 const fieldClassName =
   'block w-full rounded-lg border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:hover:border-slate-600 dark:focus:border-indigo-400 dark:focus:ring-indigo-950'
 
-export default function Login() {
-  const [showPassword, setShowPassword] = useState(false)
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-  function handleSubmit(event) {
+export default function Login() {
+  const {
+    login,
+    isAuthenticated,
+    isInitializing,
+    user,
+    authNotice,
+    clearAuthNotice,
+  } = useAuth()
+  const navigate = useNavigate()
+
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+
+  if (isInitializing) {
+    return <Loader fullScreen label="Checking authentication..." />
+  }
+
+  if (isAuthenticated && user) {
+    return <Navigate replace to={getFirstAccessibleRoute(user)} />
+  }
+
+  async function handleSubmit(event) {
     event.preventDefault()
+    setErrorMessage('')
+    clearAuthNotice()
+
+    const trimmedEmail = email.trim()
+    if (!trimmedEmail) {
+      setErrorMessage('Email address is required.')
+      return
+    }
+    if (!EMAIL_REGEX.test(trimmedEmail)) {
+      setErrorMessage('Please enter a valid email address.')
+      return
+    }
+    if (!password) {
+      setErrorMessage('Password is required.')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const loggedInUser = await login({ email: trimmedEmail, password })
+      navigate(getFirstAccessibleRoute(loggedInUser), { replace: true })
+    } catch (error) {
+      setErrorMessage(
+        getErrorMessage(error, 'Sign in failed. Please check your credentials.'),
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10 text-slate-900 dark:bg-slate-950 dark:text-slate-100 sm:px-6">
+    <main className="relative flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10 text-slate-900 sm:px-6 dark:bg-slate-950 dark:text-slate-100">
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
+        <ThemeToggle />
+      </div>
+
       <section
         aria-labelledby="login-title"
         className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-7 shadow-xl shadow-slate-200/60 sm:p-9 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/20"
@@ -40,7 +102,24 @@ export default function Login() {
           </p>
         </div>
 
-        <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
+        <div className="mt-5 space-y-3">
+          {authNotice && !errorMessage && (
+            <Alert
+              message={authNotice}
+              onClose={clearAuthNotice}
+              type="warning"
+            />
+          )}
+          {errorMessage && (
+            <Alert
+              message={errorMessage}
+              onClose={() => setErrorMessage('')}
+              type="error"
+            />
+          )}
+        </div>
+
+        <form className="mt-6 space-y-5" noValidate onSubmit={handleSubmit}>
           <div>
             <label
               className="block text-sm font-medium text-slate-700 dark:text-slate-300"
@@ -51,11 +130,14 @@ export default function Login() {
             <input
               autoComplete="username"
               className={`mt-2 ${fieldClassName}`}
+              disabled={isSubmitting}
               id="email"
               name="email"
+              onChange={(event) => setEmail(event.target.value)}
               placeholder="you@company.com"
               required
               type="email"
+              value={email}
             />
           </div>
 
@@ -70,11 +152,14 @@ export default function Login() {
               <input
                 autoComplete="current-password"
                 className={`${fieldClassName} pr-16`}
+                disabled={isSubmitting}
                 id="password"
                 name="password"
+                onChange={(event) => setPassword(event.target.value)}
                 placeholder="Enter your password"
                 required
                 type={showPassword ? 'text' : 'password'}
+                value={password}
               />
               <button
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
@@ -89,10 +174,11 @@ export default function Login() {
           </div>
 
           <button
-            className="w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 active:bg-indigo-800 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus-visible:outline-indigo-400 dark:active:bg-indigo-600"
+            className="w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 active:bg-indigo-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus-visible:outline-indigo-400 dark:active:bg-indigo-600"
+            disabled={isSubmitting}
             type="submit"
           >
-            Sign In
+            {isSubmitting ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 

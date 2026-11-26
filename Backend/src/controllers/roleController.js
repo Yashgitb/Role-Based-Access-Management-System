@@ -144,7 +144,7 @@ export const createRole = async (req, res) => {
 
     try {
 
-        const { name, permissions = {} } = req.body;
+        const { name, permissions = {} } = req.body ?? {};
 
         // Validate role name
         if (typeof name !== "string" || !name.trim()) {
@@ -186,11 +186,14 @@ export const createRole = async (req, res) => {
         role.permissions.dashboard.edit = false;
         role.permissions.dashboard.delete = false;
 
-        // Prevent privilege escalation
-        if (!canManagePermissions(
-            req.user.role.permissions,
-            role.permissions
-        )) {
+        // Prevent privilege escalation for non-Admin role managers
+        if (
+            req.user.role.name !== "Admin" &&
+            !canManagePermissions(
+                req.user.role.permissions,
+                role.permissions
+            )
+        ) {
             return res.status(403).json({
                 message: "Cannot grant permissions you do not possess"
             });
@@ -213,7 +216,7 @@ export const updateRole = async (req, res) => {
     try {
 
         const { id } = req.params;
-        const { name, permissions } = req.body;
+        const { name, permissions } = req.body ?? {};
 
         if (!mongoose.isObjectIdOrHexString(id)) {
             return res.status(400).json({
@@ -239,11 +242,14 @@ export const updateRole = async (req, res) => {
             });
         }
 
-        // Prevent unauthorized modification of powerful roles
-        if (!canManagePermissions(
-            req.user.role.permissions,
-            role.permissions
-        )) {
+        // Prevent unauthorized modification of powerful roles by non-Admin users
+        if (
+            req.user.role.name !== "Admin" &&
+            !canManagePermissions(
+                req.user.role.permissions,
+                role.permissions
+            )
+        ) {
             return res.status(403).json({
                 message: "Cannot modify a role with higher permissions"
             });
@@ -310,11 +316,14 @@ export const updateRole = async (req, res) => {
         role.permissions.dashboard.edit = false;
         role.permissions.dashboard.delete = false;
 
-        // Prevent privilege escalation
-        if (!canManagePermissions(
-            req.user.role.permissions,
-            role.permissions
-        )) {
+        // Prevent privilege escalation for non-Admin role managers
+        if (
+            req.user.role.name !== "Admin" &&
+            !canManagePermissions(
+                req.user.role.permissions,
+                role.permissions
+            )
+        ) {
             return res.status(403).json({
                 message: "Cannot grant permissions you do not possess"
             });
@@ -377,11 +386,14 @@ export const deleteRole = async (req, res) => {
             });
         }
 
-        // Prevent deletion of higher-privileged roles
-        if (!canManagePermissions(
-            req.user.role.permissions,
-            role.permissions
-        )) {
+        // Prevent deletion of higher-privileged roles by non-Admin users
+        if (
+            req.user.role.name !== "Admin" &&
+            !canManagePermissions(
+                req.user.role.permissions,
+                role.permissions
+            )
+        ) {
             return res.status(403).json({
                 message: "Cannot delete a role with higher permissions"
             });
