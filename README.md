@@ -2,11 +2,8 @@
 
 A full-stack MERN (MongoDB, Express.js, React.js, Node.js) **Role-Based Access Management System** developed as part of the Brained MERN Developer Intern assignment.
 
-
-## Application Demonstration
-
-**Demo Video:** [Watch application demonstration](YOUR_DEMO_VIDEO_URL)
-
+**Demo Video:** [Watch the demo](https://drive.google.com/file/d/1ri52kDVhR30tOaD1qw0cbHjMRK54Dt2A/view?usp=sharing)
+ 
 ---
 
 ## 1. Project Overview
@@ -46,14 +43,14 @@ This application lets an organization manage users, roles, and page/action permi
 
 These initial permissions are created when you run the seed script on a fresh database:
 
-| Module | Admin | Manager | Employee |
-| :--- | :--- | :--- | :--- |
-| Dashboard | View | View | View |
-| User Management | View, Create, Edit, Delete | View | No Access |
-| Role Management | View, Create, Edit, Delete | No Access | No Access |
-| Reports | View, Create, Edit, Delete | View | No Access |
-| Settings | View, Create, Edit, Delete | No Access | No Access |
-| My Profile | View, Edit | View, Edit | View, Edit |
+| Module          | Admin                      | Manager    | Employee   |
+| :-------------- | :------------------------- | :--------- | :--------- |
+| Dashboard       | View                       | View       | View       |
+| User Management | View, Create, Edit, Delete | View       | No Access  |
+| Role Management | View, Create, Edit, Delete | No Access  | No Access  |
+| Reports         | View, Create, Edit, Delete | View       | No Access  |
+| Settings        | View, Create, Edit, Delete | No Access  | No Access  |
+| My Profile      | View, Edit                 | View, Edit | View, Edit |
 
 ---
 
@@ -220,3 +217,9 @@ Role-Based-Access-Management-System/
 
 - [API Documentation](./API_DOCUMENTATION.md)
 - [Database Schema Documentation](./DATABASE_SCHEMA.md)
+
+---
+
+## 12. Application Demonstration
+
+- **Demo Video Link**: _Add your recorded project demonstration link here._

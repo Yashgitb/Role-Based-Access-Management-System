@@ -220,7 +220,7 @@ export default function MyProfile() {
                     Assigned Role
                   </dt>
                   <dd className="mt-1">
-                    <span className="inline-flex rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 dark:bg-indigo-950/80 dark:text-indigo-300">
+                    <span className="inline-flex rounded-full bg-indigo-50 px-3 py-1 text-sm font-semibold text-indigo-700 dark:bg-indigo-950/80 dark:text-indigo-300">
                       {profile.role}
                     </span>
                   </dd>

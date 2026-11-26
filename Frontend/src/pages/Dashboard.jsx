@@ -107,20 +107,9 @@ export default function Dashboard() {
           <p className="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
             Welcome back
           </p>
-          <h2 className="mt-1 text-xl font-semibold text-slate-900 dark:text-white">
+          <h2 className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">
             Hello, {user.name}
           </h2>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            Signed in as{' '}
-            <span className="font-medium text-slate-800 dark:text-slate-200">
-              {user.email}
-            </span>{' '}
-            with the{' '}
-            <span className="font-semibold text-indigo-600 dark:text-indigo-400">
-              {user.role}
-            </span>{' '}
-            role.
-          </p>
         </section>
       )}
 

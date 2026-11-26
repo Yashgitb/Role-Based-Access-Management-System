@@ -526,11 +526,11 @@ export default function UserManagement() {
                       key={item._id}
                     >
                       <td
-                        className={`${cellPadding} font-medium text-slate-900 dark:text-white`}
+                        className={`${cellPadding} text-base font-semibold text-slate-900 dark:text-white`}
                       >
                         {item.name}
                         {isSelf && (
-                          <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                          <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                             You
                           </span>
                         )}
@@ -541,7 +541,7 @@ export default function UserManagement() {
                         {item.email}
                       </td>
                       <td className={cellPadding}>
-                        <span className="inline-flex rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 dark:bg-indigo-950/80 dark:text-indigo-300">
+                        <span className="inline-flex rounded-full bg-indigo-50 px-3 py-1 text-sm font-semibold text-indigo-700 dark:bg-indigo-950/80 dark:text-indigo-300">
                           {item.role?.name || 'Unassigned'}
                         </span>
                       </td>

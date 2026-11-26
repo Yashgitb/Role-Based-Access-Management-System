@@ -46,11 +46,11 @@ export default function Navbar({ title, onMenuClick }) {
 
       <div className="flex items-center gap-2.5 sm:gap-3">
         {user && (
-          <div className="hidden items-center gap-2 sm:flex">
-            <span className="text-xs font-semibold text-slate-800 dark:text-slate-100">
+          <div className="hidden items-center gap-2.5 sm:flex">
+            <span className="text-base font-semibold text-slate-900 dark:text-white">
               {user.name}
             </span>
-            <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-[11px] font-semibold text-indigo-700 dark:bg-indigo-950/80 dark:text-indigo-300">
+            <span className="rounded-full bg-indigo-50 px-3 py-1 text-sm font-semibold text-indigo-700 dark:bg-indigo-950/80 dark:text-indigo-300">
               {user.role}
             </span>
           </div>
