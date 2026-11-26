@@ -3,6 +3,10 @@ import dotenv from "dotenv"
 import cors from "cors"
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
+import roleRoutes from "./routes/roleRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+
+
 
 
 dotenv.config()
@@ -26,9 +30,14 @@ app.get('/',(req,res) => {
 })
 
 
+
 app.listen(PORT,() => {
     console.log(`Server is running on port ${PORT}`);
 })
 
 
 app.use("/api/auth", authRoutes);
+
+
+app.use("/api/roles", roleRoutes);
+app.use("/api/users", userRoutes);
